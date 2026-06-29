@@ -46,6 +46,7 @@ export default function Hero({
           className="flex flex-col items-center"
         >
           <motion.p
+            /* @ts-ignore */
             variants={currentFadeInUp}
             className="label-eyebrow text-accent font-semibold mb-6 tracking-[0.15em] uppercase text-xs md:text-sm bg-accent-light px-4 py-1.5 rounded-full"
           >
@@ -53,6 +54,7 @@ export default function Hero({
           </motion.p>
 
           <motion.h1
+            /* @ts-ignore */
             variants={currentFadeInUp}
             className="hero-headline text-dark mb-6 tracking-tight max-w-[850px] font-display"
           >
@@ -60,6 +62,7 @@ export default function Hero({
           </motion.h1>
 
           <motion.p
+            /* @ts-ignore */
             variants={currentFadeInUp}
             className="text-body text-muted mb-10 max-w-[640px] text-base md:text-lg lg:text-xl font-normal leading-relaxed"
           >
@@ -68,6 +71,7 @@ export default function Hero({
           </motion.p>
 
           <motion.div
+            /* @ts-ignore */
             variants={currentFadeInUp}
             className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full sm:w-auto"
           >

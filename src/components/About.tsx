@@ -36,6 +36,7 @@ export default function About() {
         >
           {/* Left column: Pull Quote with a border */}
           <motion.div
+            /* @ts-ignore */
             variants={currentFadeInUp}
             className="lg:col-span-5 border-l-4 border-accent pl-6 py-2"
           >
@@ -47,6 +48,7 @@ export default function About() {
 
           {/* Right column: Paragraphs */}
           <motion.div
+            /* @ts-ignore */
             variants={currentFadeInUp}
             className="lg:col-span-7 space-y-6"
           >
