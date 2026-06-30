@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import Logo from "@/assets/logo-transparent.png";
+import Logo from "@/assets/nics-no-text-transparent.png";
 import Image from "next/image";
 
 interface NavbarProps {
@@ -9,34 +10,36 @@ interface NavbarProps {
   activeSection: string;
 }
 
+const navLinks = [
+  { name: "Home", id: "home" },
+  { name: "About", id: "about" },
+  { name: "What We Do", id: "what-we-do" },
+  { name: "Events", id: "events" },
+  { name: "Join Us", id: "community" },
+];
+
 export default function Navbar({ onNavClick, activeSection }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const menuCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 80) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "Home", id: "home" },
-    { name: "About", id: "about" },
-    { name: "What We Do", id: "what-we-do" },
-    { name: "Events", id: "events" },
-    { name: "Join Us", id: "community" },
-  ];
+  useEffect(() => {
+    return () => {
+      if (menuCloseTimerRef.current) clearTimeout(menuCloseTimerRef.current);
+    };
+  }, []);
 
-  const handleLinkClick = (id: string) => {
+  const handleDesktopLinkClick = (id: string) => onNavClick(id);
+
+  const handleMobileLinkClick = (id: string) => {
     setIsOpen(false);
-    onNavClick(id);
+    menuCloseTimerRef.current = setTimeout(() => onNavClick(id), 320);
   };
 
   return (
@@ -46,61 +49,56 @@ export default function Navbar({ onNavClick, activeSection }: NavbarProps) {
         scrolled ? "shadow-[0_2px_16px_rgba(0,0,0,0.06)] py-3" : "py-4"
       }`}
     >
-      <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between">
-        {/* Left: NICS Logo Wordmark */}
-        <button
+      <div className="max-w-300 mx-auto px-6 flex items-center justify-between">
+        {/* Logo */}
+        <Link
+          href="/"
+          scroll={true}
           id="navbar-logo-btn"
-          onClick={() => handleLinkClick("home")}
           className="flex items-center gap-2 cursor-pointer group"
           aria-label="NICS Home"
         >
-          {/* <span className="font-display text-2xl font-bold tracking-tight text-dark transition-colors group-hover:text-accent"> */}
-          {/*   NICS */}
-          {/* </span> */}
-          {/* <span className="w-2 h-2 rounded-full bg-accent animate-pulse" /> */}
-          <Image src={Logo} alt="NICS" className="w-15 h-15" />
-        </button>
+          <Image loading="eager" src={Logo} alt="NICS" className="w-15 h-15" />
+        </Link>
 
-        {/* Center/Right: Desktop Nav Links */}
-        <nav id="desktop-nav" className="hidden md:flex items-center gap-8">
+        {/* Desktop Nav — relative so the underline anchors here */}
+        <nav
+          id="desktop-nav"
+          className="hidden md:flex items-center gap-8 relative"
+        >
           {navLinks.map((link) => (
             <button
               key={link.id}
               id={`nav-link-${link.id}`}
-              onClick={() => handleLinkClick(link.id)}
-              className={`btn-text text-sm cursor-pointer relative py-1 transition-colors hover:text-accent ${
+              onClick={() => handleDesktopLinkClick(link.id)}
+              className={`btn-text text-sm cursor-pointer py-1 transition-colors hover:text-accent ${
                 activeSection === link.id
                   ? "text-accent font-semibold"
                   : "text-muted"
               }`}
             >
               {link.name}
-              {activeSection === link.id && (
-                <motion.span
-                  layoutId="activeNavLine"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
-              )}
             </button>
           ))}
+
+          {/* <ActiveUnderline activeId={activeSection} /> */}
         </nav>
 
-        {/* Far Right: Desktop CTA */}
+        {/* Desktop CTA */}
         <div id="desktop-cta" className="hidden md:flex items-center">
           <button
             id="navbar-cta-btn"
-            onClick={() => handleLinkClick("community")}
+            onClick={() => handleDesktopLinkClick("community")}
             className="btn-text bg-accent text-white px-5 py-2.5 rounded-full hover:bg-accent/90 transition-colors cursor-pointer shadow-sm shadow-accent/10 hover:shadow-md hover:shadow-accent/20"
           >
             Join NICS
           </button>
         </div>
 
-        {/* Mobile: Hamburger toggle */}
+        {/* Mobile hamburger */}
         <button
           id="mobile-nav-toggle"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOpen((prev) => !prev)}
           className="md:hidden p-2 text-dark hover:text-accent transition-colors cursor-pointer"
           aria-label={isOpen ? "Close menu" : "Open menu"}
         >
@@ -108,7 +106,7 @@ export default function Navbar({ onNavClick, activeSection }: NavbarProps) {
         </button>
       </div>
 
-      {/* Mobile: Fullscreen/slide-down Nav */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -124,7 +122,7 @@ export default function Navbar({ onNavClick, activeSection }: NavbarProps) {
                 <button
                   key={link.id}
                   id={`mobile-nav-link-${link.id}`}
-                  onClick={() => handleLinkClick(link.id)}
+                  onClick={() => handleMobileLinkClick(link.id)}
                   className={`btn-text text-left text-lg py-2 transition-colors hover:text-accent ${
                     activeSection === link.id
                       ? "text-accent font-semibold"
@@ -136,7 +134,7 @@ export default function Navbar({ onNavClick, activeSection }: NavbarProps) {
               ))}
               <button
                 id="mobile-navbar-cta-btn"
-                onClick={() => handleLinkClick("community")}
+                onClick={() => handleMobileLinkClick("community")}
                 className="btn-text bg-accent text-white text-center py-3 rounded-full hover:bg-accent/90 transition-colors w-full cursor-pointer mt-2"
               >
                 Join NICS
@@ -146,5 +144,42 @@ export default function Navbar({ onNavClick, activeSection }: NavbarProps) {
         )}
       </AnimatePresence>
     </header>
+  );
+}
+
+function ActiveUnderline({ activeId }: { activeId: string }) {
+  const [underline, setUnderline] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      const btn = document.getElementById(`nav-link-${activeId}`);
+      const nav = document.getElementById("desktop-nav");
+      if (!btn || !nav) {
+        setUnderline(null);
+        return;
+      }
+      const navRect = nav.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+      setUnderline({
+        left: btnRect.left - navRect.left,
+        width: btnRect.width,
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [activeId]);
+
+  if (!underline) return null;
+
+  return (
+    <motion.span
+      aria-hidden
+      className="absolute h-0.5 bg-accent pointer-events-none"
+      initial={false}
+      animate={{ left: underline.left, width: underline.width, bottom: 0 }}
+      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+    />
   );
 }
